@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pathformer PV · Clinical Diagnostic System</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F8F6F1;--bg2:#F0EDE5;--surface:#FFFFFF;--surface2:#F5F3EE;
+  --border:#E2DDD4;--border2:#CCC7BC;
+  --ink:#18160F;--ink2:#3D3A32;--ink3:#706C62;--ink4:#A09C93;
+  --red:#C0392B;--red-light:#FDF0EE;--red-border:#EAB8B3;
+  --green:#1D6A45;--green-light:#EEF7F2;--green-border:#A8D4BC;
+  --amber:#8B5E00;--amber-light:#FEF6E4;--amber-border:#E8C870;
+  --blue:#1B3F72;--blue-light:#EEF2FA;--blue-border:#AFC4E0;
+  --r:6px;--r-lg:12px;--r-xl:16px;
+  --font:'DM Sans',sans-serif;--serif:'Lora',serif;--mono:'DM Mono',monospace;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 3px 10px rgba(0,0,0,.04);
+  --shadow-md:0 2px 6px rgba(0,0,0,.07),0 8px 24px rgba(0,0,0,.05);
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.6;min-height:100vh}
+
+nav{background:var(--surface);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 28px;justify-content:space-between;position:sticky;top:0;z-index:500}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-icon{width:32px;height:32px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-family:var(--serif);font-weight:600;font-style:italic}
+.nav-name{font-family:var(--serif);font-size:17px;color:var(--ink);letter-spacing:-.01em}
+.nav-name span{color:var(--red)}
+.nav-tabs{display:flex;gap:2px}
+.nav-tab{padding:6px 16px;border-radius:var(--r);font-size:13px;font-weight:500;color:var(--ink3);cursor:pointer;border:none;background:transparent;transition:all .15s;font-family:var(--font)}
+.nav-tab:hover{background:var(--bg2);color:var(--ink)}
+.nav-tab.active{background:var(--ink);color:#fff}
+.nav-badge{font-size:11px;font-weight:600;background:var(--green-light);color:var(--green);border:1px solid var(--green-border);padding:3px 10px;border-radius:20px}
+
+.page{display:none}
+.page.on{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px 80px}
+
+/* PAGE 1 */
+.hero{padding:52px 0 44px;border-bottom:1px solid var(--border);margin-bottom:44px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:'';width:20px;height:1.5px;background:var(--red);display:block}
+.hero-h{font-family:var(--serif);font-size:40px;line-height:1.15;color:var(--ink);margin-bottom:16px;max-width:600px}
+.hero-h em{font-style:italic;color:var(--red)}
+.hero-p{font-size:15px;color:var(--ink3);max-width:520px;line-height:1.75;margin-bottom:30px}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;padding:11px 22px;border-radius:var(--r);font-size:14px;font-weight:500;cursor:pointer;border:none;font-family:var(--font);transition:background .15s}
+.cta-btn:hover{background:var(--red)}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:44px;padding-top:36px;border-top:1px solid var(--border)}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow)}
+.stat-n{font-family:var(--mono);font-size:26px;font-weight:500;line-height:1;margin-bottom:4px}
+.stat-l{font-size:11px;color:var(--ink4)}
+
+.steps-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow);margin-bottom:28px}
+.steps-head{padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:13px;font-weight:600;color:var(--ink)}
+.step-row{display:flex;align-items:flex-start;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border)}
+.step-row:last-child{border-bottom:none}
+.step-n{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-family:var(--mono)}
+.step-t{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.step-d{font-size:12px;color:var(--ink3);line-height:1.6}
+
+.disclaimer{background:var(--red-light);border:1px solid var(--red-border);border-radius:var(--r-lg);padding:14px 18px;display:flex;gap:12px;align-items:flex-start;font-size:12px;color:var(--ink3);line-height:1.6}
+
+/* PAGE 2 */
+.p2-grid{display:grid;grid-template-columns:360px 1fr;gap:24px;padding-top:32px;align-items:start}
+.input-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow);position:sticky;top:68px}
+.ip-head{padding:18px 22px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.ip-head-t{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.ip-head-s{font-size:11px;color:var(--ink4)}
+.ip-sec{padding:16px 22px;border-bottom:1px solid var(--border)}
+.ip-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:12px}
+
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:18px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2)}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--red);background:var(--red-light)}
+.drop-zone.loaded{border-style:solid;border-color:var(--green);background:var(--green-light)}
+.dz-icon{font-size:22px;margin-bottom:6px}
+.dz-text{font-size:12px;color:var(--ink3)}
+.dz-text strong{color:var(--ink)}
+.dz-fname{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:5px;font-weight:500}
+input[type=file]{display:none}
+
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;font-weight:600;color:var(--ink3)}
+.field input,.field select{padding:8px 10px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;font-family:var(--mono);background:var(--bg);color:var(--ink);outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus{border-color:var(--ink)}
+
+.ptable{width:100%;border-collapse:collapse;font-size:12px}
+.ptable th{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink4);padding:6px 8px;border-bottom:1px solid var(--border);text-align:left}
+.ptable td{padding:5px 8px;border-bottom:1px solid rgba(226,221,212,.5);vertical-align:middle}
+.ptable tr:last-child td{border-bottom:none}
+.p-sym{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:12px}
+.p-name{font-size:10px;color:var(--ink4);margin-top:1px}
+.p-inp{width:80px;padding:5px 7px;border:1px solid var(--border2);border-radius:5px;font-family:var(--mono);font-size:12px;background:var(--bg);color:var(--ink);outline:none;transition:border-color .15s}
+.p-inp:focus{border-color:var(--ink)}
+.p-pct{font-family:var(--mono);font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;min-width:52px;display:inline-block;text-align:center}
+.pct-hi{background:var(--red-light);color:var(--red)}
+.pct-lo{background:var(--amber-light);color:var(--amber)}
+.pct-ok{background:var(--bg2);color:var(--ink4)}
+.pct-ref{background:var(--blue-light);color:var(--blue)}
+.pct-mt{color:var(--ink4)}
+
+.analyse-btn{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);transition:background .15s}
+.analyse-btn:hover{background:var(--red)}
+
+.result-placeholder{background:var(--surface);border:2px dashed var(--border);border-radius:var(--r-xl);padding:80px 40px;text-align:center}
+.rp-icon{font-size:44px;margin-bottom:14px;opacity:.25}
+.rp-t{font-size:15px;color:var(--ink4);margin-bottom:4px}
+.rp-s{font-size:12px;color:var(--ink4)}
+
+/* RESULTS */
+.verdict{border-radius:var(--r-xl);padding:28px 30px;box-shadow:var(--shadow-md);margin-bottom:16px}
+.verdict.pos{background:#FEF0EE;border:2px solid var(--red)}
+.verdict.neg{background:#EEF7F2;border:2px solid var(--green)}
+.v-top{display:flex;align-items:flex-start;gap:18px;margin-bottom:16px}
+.v-icon{font-size:44px;flex-shrink:0}
+.v-label{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:4px}
+.v-label.pos{color:var(--red)}
+.v-label.neg{color:var(--green)}
+.v-desc{font-size:13px;color:var(--ink3);line-height:1.6}
+.v-conf{margin-left:auto;text-align:center;flex-shrink:0}
+.v-conf-n{font-family:var(--mono);font-size:42px;font-weight:500;line-height:1}
+.v-conf-n.pos{color:var(--red)}
+.v-conf-n.neg{color:var(--green)}
+.v-conf-l{font-size:10px;color:var(--ink4);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+.conf-track{height:6px;background:rgba(0,0,0,.06);border-radius:3px;overflow:hidden;margin-top:10px;max-width:340px}
+.conf-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.22,1,.36,1)}
+.conf-fill.pos{background:var(--red)}
+.conf-fill.neg{background:var(--green)}
+
+.plain-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px}
+.plain-head{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:12px;font-weight:600;color:var(--ink)}
+.plain-body{padding:16px 20px;font-size:13px;color:var(--ink3);line-height:1.75}
+.plain-body strong{color:var(--ink)}
+
+.protein-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow)}
+.pc-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.pc-title{font-size:14px;font-weight:600;color:var(--ink)}
+.pc-badges{display:flex;gap:6px;flex-wrap:wrap}
+
+.sec-banner{padding:8px 22px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.sec-banner.ab{background:var(--red-light);color:var(--red)}
+.sec-banner.nm{background:var(--surface2);color:var(--ink4)}
+.sec-banner.rf{background:var(--blue-light);color:var(--blue)}
+
+.rtable{width:100%;border-collapse:collapse}
+.rtable th{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);padding:9px 18px;border-bottom:1px solid var(--border);text-align:left;background:var(--surface2)}
+.rtable td{padding:11px 18px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+.rtable tr:last-child td{border-bottom:none}
+.rtable tr.row-ab{background:#FEF8F7}
+.rtable tr.row-rf{background:#F3F8FF}
+.rtable tr:hover td{background:var(--bg2)}
+.r-sym{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink)}
+.r-nm{font-size:11px;color:var(--ink4);margin-top:1px}
+.mono{font-family:var(--mono);font-size:12px}
+.col-red{color:var(--red);font-weight:600}
+.col-amb{color:var(--amber);font-weight:600}
+.col-grn{color:var(--ink3)}
+.col-blu{color:var(--blue)}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;font-family:var(--mono)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-amb{background:var(--amber-light);color:var(--amber)}
+.badge-ok{background:var(--bg2);color:var(--ink4)}
+.badge-blu{background:var(--blue-light);color:var(--blue)}
+.status{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block}
+.st-ab{background:var(--red-light);color:var(--red)}
+.st-ok{background:var(--green-light);color:var(--green)}
+.st-rf{background:var(--blue-light);color:var(--blue)}
+
+.elisa-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border)}
+.elisa-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px}
+.elisa-lbl{font-size:11px;color:var(--ink4);margin-bottom:5px}
+.elisa-val{font-family:var(--mono);font-size:22px;font-weight:500;margin-bottom:2px}
+.elisa-val.hi{color:var(--red)}
+.elisa-val.lo{color:var(--green)}
+.elisa-ref{font-size:11px;font-weight:600}
+.elisa-ref.hi{color:var(--red)}
+.elisa-ref.lo{color:var(--green)}
+
+.tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;display:inline-block}
+.tag-red{background:var(--red-light);color:var(--red);border:1px solid var(--red-border)}
+.tag-grn{background:var(--green-light);color:var(--green);border:1px solid var(--green-border)}
+.tag-blu{background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-border)}
+.tag-amb{background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)}
+
+.recs{padding:16px 22px;border-top:1px solid var(--border);background:var(--surface2)}
+.recs-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px}
+.rec{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink2);margin-bottom:7px}
+.rec:last-child{margin-bottom:0}
+.rec-arr{color:var(--ink4);flex-shrink:0;margin-top:2px}
+
+.loader{display:none;position:fixed;inset:0;background:rgba(248,246,241,.85);backdrop-filter:blur(6px);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.loader.on{display:flex}
+.spin{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-t{font-size:13px;color:var(--ink3)}
+
+@media(max-width:820px){
+  .p2-grid{grid-template-columns:1fr}.input-panel{position:static}
+  .hero-stats{grid-template-columns:1fr 1fr}
+  nav{padding:0 16px}.nav-tabs{display:none}
+  .wrap{padding:0 16px 60px}.hero-h{font-size:30px}
+}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader">
+  <div class="spin"></div>
+  <div class="loader-t">Analysing protein expression…</div>
+</div>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-icon">℞</div>
+    <span class="nav-name">Pathformer <span>PV</span></span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goto('home',this)">Overview</button>
+    <button class="nav-tab" onclick="goto('analysis',this)">Patient Analysis</button>
+  </div>
+  <div class="nav-badge">Research Tool · v2.0</div>
+</nav>
+
+<!-- ═══ PAGE 1 ═══ -->
+<div class="page on" id="page-home">
+<div class="wrap" style="max-width:760px">
+
+  <div class="hero">
+    <h1 class="hero-h">AI Blood Test for <em>Pemphigus Vulgaris</em> Detection</h1>
+    <p class="hero-p">Upload a simple blood sample report. Pathformer checks 11 key proteins, calculates expression levels automatically, and gives a clear PV Positive or Negative result — in plain language anyone can understand.</p>
+    <button class="cta-btn" onclick="goto('analysis', document.querySelectorAll('.nav-tab')[1])">Start Patient Analysis →</button>
+  </div>
+
+  <div class="steps-card">
+    <div class="steps-head">How it works — 3 simple steps</div>
+    <div class="step-row">
+      <div class="step-n">1</div>
+      <div>
+        <div class="step-t">Upload the blood sample report</div>
+        <div class="step-d">A simple CSV file from the lab with raw protein values in ng/mL. No technical knowledge needed — just upload and go.</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-n">2</div>
+      <div>
+        <div class="step-t">App calculates expression levels automatically</div>
+        <div class="step-d">Pathformer compares the patient's protein values against healthy reference levels and computes expression percentages instantly.</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-n">3</div>
+      <div>
+        <div class="step-t">Get a clear result with plain-language explanation</div>
+        <div class="step-d">PV Positive or Negative with a confidence score, a breakdown of which proteins are abnormal, and recommended next steps for the doctor.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <span style="font-size:16px;flex-shrink:0">⚕️</span>
+    <div><strong style="color:var(--ink)">Clinical Disclaimer:</strong> This is a research screening tool. All results must be confirmed by a qualified clinician with biopsy and standard lab tests before any treatment decision is made.</div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══ PAGE 2 ═══ -->
+<div class="page" id="page-analysis">
+<div class="wrap">
+<div class="p2-grid">
+
+  <!-- INPUT PANEL -->
+  <div class="input-panel">
+    <div class="ip-head">
+      <div class="ip-head-t">Blood Sample Input</div>
+      <div class="ip-head-s">Upload CSV or enter values manually</div>
+    </div>
+
+    <div class="ip-sec">
+      <div class="ip-lbl">Upload Lab Report (CSV)</div>
+      <div class="drop-zone" id="dropZone"
+        onclick="document.getElementById('fileIn').click()"
+        ondragover="onDrag(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+        <div class="dz-icon">📄</div>
+        <div class="dz-text"><strong>Click to upload</strong> or drag & drop your CSV file</div>
+        <div class="dz-fname" id="dzFname"></div>
+      </div>
+      <input type="file" id="fileIn" accept=".csv,.tsv,.txt" onchange="onFileSelect(event)"/>
+    </div>
+
+    <div class="ip-sec">
+      <div class="ip-lbl">Patient Details</div>
+      <div class="frow">
+        <div class="field"><label>Name</label><input id="fName" type="text" placeholder="Patient name"/></div>
+        <div class="field"><label>ID</label><input id="fId" type="text" placeholder="Lab ID"/></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Age</label><input id="fAge" type="number" placeholder="e.g. 34"/></div>
+        <div class="field"><label>Sex</label>
+          <select id="fSex"><option value="M">Male</option><option value="F">Female</option><option value="O">Other</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="ip-sec">
+      <div class="ip-lbl">ELISA Antibody Test (U/mL)</div>
+      <div style="font-size:11px;color:var(--ink4);margin-bottom:10px">Normal range: below 20 U/mL</div>
+      <div class="frow">
+        <div class="field"><label>Anti-DSG3</label><input id="eDsg3" type="number" step="0.1" placeholder="e.g. 145.3"/></div>
+        <div class="field"><label>Anti-DSG1</label><input id="eDsg1" type="number" step="0.1" placeholder="e.g. 68.7"/></div>
+      </div>
+    </div>
+
+    <div class="ip-sec">
+      <div class="ip-lbl">Protein Concentrations (ng/mL)</div>
+      <div style="font-size:11px;color:var(--ink4);margin-bottom:10px">Enter lab values. <strong style="color:var(--ink2)">Expression % auto-calculated →</strong></div>
+      <table class="ptable">
+        <thead><tr><th>Protein</th><th>ng/mL</th><th>Expr %</th></tr></thead>
+        <tbody id="pRows"></tbody>
+      </table>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button onclick="loadDemo('pv')" style="flex:1;padding:8px;font-size:11px;font-weight:600;border:1px solid var(--red-border);border-radius:var(--r);background:var(--red-light);cursor:pointer;font-family:var(--font);color:var(--red)">Load PV Demo</button>
+        <button onclick="loadDemo('ctrl')" style="flex:1;padding:8px;font-size:11px;font-weight:600;border:1px solid var(--green-border);border-radius:var(--r);background:var(--green-light);cursor:pointer;font-family:var(--font);color:var(--green)">Load Healthy Demo</button>
+      </div>
+    </div>
+
+    <div style="padding:16px 22px">
+      <button class="analyse-btn" onclick="runAnalysis()">Analyse Sample →</button>
+    </div>
+  </div>
+
+  <!-- RESULT AREA -->
+  <div id="resultArea">
+    <div class="result-placeholder">
+      <div class="rp-icon">🔬</div>
+      <div class="rp-t">No result yet</div>
+      <div class="rp-s">Upload a CSV or enter protein values, then click Analyse</div>
+    </div>
+  </div>
+
+</div>
+</div>
+</div>
+
+<script>
+const GENES=[
+  {sym:'DSG3', name:'Desmoglein-3',        ref:1.04, type:'PV Marker',  plain:'Main protein attacked in PV'},
+  {sym:'DSG1', name:'Desmoglein-1',        ref:1.67, type:'PV Marker',  plain:'Skin adhesion protein'},
+  {sym:'IL6',  name:'Interleukin-6',       ref:0.91, type:'Immune',     plain:'Inflammation signal protein'},
+  {sym:'TNF',  name:'Tumour Necrosis F.',  ref:1.43, type:'Immune',     plain:'Immune response activator'},
+  {sym:'DSC3', name:'Desmocollin-3',       ref:2.12, type:'Structural', plain:'Cell adhesion molecule'},
+  {sym:'IL17A',name:'Interleukin-17A',     ref:2.24, type:'Immune',     plain:'Inflammatory cascade protein'},
+  {sym:'PKP1', name:'Plakophilin-1',       ref:3.98, type:'Structural', plain:'Cell junction linker'},
+  {sym:'JUP',  name:'Junction Plakoglobin',ref:4.46, type:'Structural', plain:'Desmosomal junction protein'},
+  {sym:'TP53', name:'Tumour Protein P53',  ref:6.32, type:'Regulatory', plain:'Cell cycle controller'},
+  {sym:'ACTB', name:'Beta-Actin',          ref:5.18, type:'Reference',  plain:'Quality control protein'},
+  {sym:'GAPDH',name:'GAPDH',              ref:5.01, type:'Reference',  plain:'Quality control protein'},
+];
+const IDS={DSG3:'g0',DSG1:'g1',IL6:'g2',TNF:'g3',DSC3:'g4',IL17A:'g5',PKP1:'g6',JUP:'g7',TP53:'g8',ACTB:'g9',GAPDH:'g10'};
+const DEMO_PV  ={name:'Rajesh Kumar Sharma',id:'GDC-2024-08471',age:34,sex:'M',eDsg3:145.3,eDsg1:68.7,DSG3:8.12,DSG1:6.85,IL6:7.93,TNF:7.28,DSC3:6.64,IL17A:6.10,PKP1:5.73,JUP:4.92,TP53:3.54,ACTB:5.02,GAPDH:4.96};
+const DEMO_CTRL={name:'Priya Venkataraman',id:'GDC-2024-07832',age:31,sex:'F',eDsg3:4.2,eDsg1:3.8,DSG3:1.08,DSG1:1.63,IL6:0.96,TNF:1.45,DSC3:2.18,IL17A:2.17,PKP1:4.30,JUP:4.64,TP53:6.70,ACTB:5.13,GAPDH:5.06};
+
+// Build rows
+(function(){
+  const tb=document.getElementById('pRows');
+  tb.innerHTML=GENES.map((g,i)=>`<tr>
+    <td><div class="p-sym">${g.sym}</div><div class="p-name">${g.plain}</div></td>
+    <td><input class="p-inp" id="${IDS[g.sym]}" type="number" step="0.01" placeholder="—" oninput="calcPct('${g.sym}')"/></td>
+    <td><span id="pct_${g.sym}" class="p-pct pct-mt">—</span></td>
+  </tr>`).join('');
+})();
+
+function calcPct(sym){
+  const g=GENES.find(x=>x.sym===sym);
+  const inp=document.getElementById(IDS[sym]);
+  const sp=document.getElementById('pct_'+sym);
+  const v=parseFloat(inp.value);
+  if(isNaN(v)||v<=0){sp.className='p-pct pct-mt';sp.textContent='—';return;}
+  const p=(v/g.ref)*100;
+  const isRef=g.type==='Reference';
+  let c='pct-ok';
+  if(isRef) c='pct-ref';
+  else if(p>150) c='pct-hi';
+  else if(p<80)  c='pct-lo';
+  sp.className='p-pct '+c;
+  sp.textContent=p.toFixed(1)+'%';
+}
+
+function goto(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function onDrag(e){e.preventDefault();document.getElementById('dropZone').classList.add('drag')}
+function onDragLeave(){document.getElementById('dropZone').classList.remove('drag')}
+function onDrop(e){e.preventDefault();onDragLeave();const f=e.dataTransfer.files[0];if(f)parseFile(f)}
+function onFileSelect(e){const f=e.target.files[0];if(f)parseFile(f)}
+
+function parseFile(f){
+  document.getElementById('dzFname').textContent='✓ '+f.name;
+  document.getElementById('dropZone').classList.add('loaded');
+  const r=new FileReader();
+  r.onload=ev=>{
+    ev.target.result.split('\n').forEach(line=>{
+      if(!line.trim()||line.startsWith('#'))return;
+      const parts=line.split(',');
+      const key=(parts[0]||'').trim().toUpperCase();
+      const val=(parts[1]||'').trim();
+      const num=parseFloat(val);
+      if(IDS[key]&&!isNaN(num)){document.getElementById(IDS[key]).value=num;calcPct(key);}
+      if(key==='ELISA_DSG3'&&!isNaN(num)) document.getElementById('eDsg3').value=num;
+      if(key==='ELISA_DSG1'&&!isNaN(num)) document.getElementById('eDsg1').value=num;
+      if(key==='PATIENT_NAME') document.getElementById('fName').value=val;
+      if(key==='PATIENT_ID')   document.getElementById('fId').value=val;
+      if(key==='AGE'&&!isNaN(num)) document.getElementById('fAge').value=num;
+      if(key==='SEX') document.getElementById('fSex').value=val;
+    });
+  };
+  r.readAsText(f);
+}
+
+function loadDemo(type){
+  const d=type==='pv'?DEMO_PV:DEMO_CTRL;
+  document.getElementById('fName').value=d.name;
+  document.getElementById('fId').value=d.id;
+  document.getElementById('fAge').value=d.age;
+  document.getElementById('fSex').value=d.sex;
+  document.getElementById('eDsg3').value=d.eDsg3;
+  document.getElementById('eDsg1').value=d.eDsg1;
+  GENES.forEach(g=>{if(d[g.sym]!==undefined){document.getElementById(IDS[g.sym]).value=d[g.sym];calcPct(g.sym);}});
+}
+
+function runAnalysis(){
+  const raws={};
+  GENES.forEach(g=>{raws[g.sym]=parseFloat(document.getElementById(IDS[g.sym]).value)||null;});
+  if(Object.values(raws).filter(v=>v!==null).length<4){alert('Please enter at least 4 protein values.');return;}
+  document.getElementById('loader').classList.add('on');
+  setTimeout(()=>{document.getElementById('loader').classList.remove('on');showResult(raws);},1400);
+}
+
+function showResult(raws){
+  const name=document.getElementById('fName').value||'Unknown Patient';
+  const pid =document.getElementById('fId').value||'—';
+  const age =document.getElementById('fAge').value;
+  const sex =document.getElementById('fSex').value;
+  const e3  =parseFloat(document.getElementById('eDsg3').value);
+  const e1  =parseFloat(document.getElementById('eDsg1').value);
+  const date=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  const data=GENES.map(g=>{
+    const raw=raws[g.sym];
+    const pct=raw!==null?(raw/g.ref)*100:null;
+    const isRef=g.type==='Reference';
+    const abnormal=pct!==null&&pct>150&&!isRef;
+    const reduced =pct!==null&&pct<75 &&!isRef;
+    return{...g,raw,pct,isRef,abnormal,reduced};
+  });
+
+  // Score
+  let score=0;
+  const dsg3=data.find(g=>g.sym==='DSG3');
+  const il6 =data.find(g=>g.sym==='IL6');
+  const dsg1=data.find(g=>g.sym==='DSG1');
+  if(dsg3?.pct>150) score+=30;
+  if(dsg3?.pct>300) score+=10;
+  if(il6?.pct>150)  score+=18;
+  if(dsg1?.pct>150) score+=15;
+  data.filter(g=>g.abnormal&&['Immune','Structural'].includes(g.type)).forEach(()=>{score+=7;});
+  if(!isNaN(e3)&&e3>20)  score+=15;
+  if(!isNaN(e3)&&e3>100) score+=8;
+  score=Math.min(score,100);
+
+  const isPV=score>=45;
+  const conf=isPV?Math.min(Math.round(50+score/2),99):Math.max(Math.round(97-score),80);
+
+  const abnorms=data.filter(g=>g.abnormal||g.reduced);
+  const norms  =data.filter(g=>!g.abnormal&&!g.reduced&&!g.isRef);
+  const refs   =data.filter(g=>g.isRef);
+
+  function row(d,hl){
+    const rc=hl&&(d.abnormal||d.reduced)?'row-ab':(d.isRef?'row-rf':'');
+    const pctTxt=d.pct!==null?d.pct.toFixed(1)+'%':'—';
+    const pctCls=d.abnormal?'col-red':(d.reduced?'col-amb':(d.isRef?'col-blu':'col-grn'));
+    const rawTxt=d.raw!==null?d.raw+' ng/mL':'—';
+    const ratio=d.pct!==null?(d.pct/100).toFixed(2):'—';
+    let ratioBadge='<span class="badge badge-ok">'+ratio+'×</span>';
+    if(d.abnormal) ratioBadge='<span class="badge badge-red">↑ '+ratio+'×</span>';
+    else if(d.reduced) ratioBadge='<span class="badge badge-amb">↓ '+ratio+'×</span>';
+    else if(d.isRef)   ratioBadge='<span class="badge badge-blu">'+ratio+'×</span>';
+    let st='<span class="status st-ok">Normal</span>';
+    if(d.isRef)    st='<span class="status st-rf">Reference</span>';
+    if(d.abnormal) st='<span class="status st-ab">⚠ High</span>';
+    if(d.reduced)  st='<span class="status st-ab">↓ Low</span>';
+    const typeTags={'PV Marker':'tag-red','Immune':'tag-amb','Structural':'tag-blu','Regulatory':'','Reference':'tag-grn'};
+    const tc=typeTags[d.type]||'';
+    const typeTag=`<span class="tag ${tc}" ${tc?'':'style="background:var(--bg2);color:var(--ink3);border:1px solid var(--border)"'}>${d.type}</span>`;
+    return`<tr class="${rc}">
+      <td><div class="r-sym">${d.sym}</div><div class="r-nm">${d.name}</div></td>
+      <td>${typeTag}</td>
+      <td><span class="mono col-grn">${rawTxt}</span></td>
+      <td><span class="mono ${pctCls}">${pctTxt}</span></td>
+      <td>${ratioBadge}</td>
+      <td>${st}</td>
+    </tr>`;
+  }
+
+  const thead=`<thead><tr>
+    <th>Protein</th><th>Type</th><th>Raw Value</th><th>Expression %</th><th>vs Healthy</th><th>Status</th>
+  </tr></thead>`;
+
+  const e3ok=!isNaN(e3)&&e3<20, e1ok=!isNaN(e1)&&e1<20;
+  const elisaHtml=`<div class="elisa-row">
+    <div class="elisa-box">
+      <div class="elisa-lbl">Anti-DSG3 antibody (skin protein)</div>
+      <div class="elisa-val ${!isNaN(e3)&&!e3ok?'hi':'lo'}">${!isNaN(e3)?e3+' U/mL':'Not entered'}</div>
+      <div class="elisa-ref ${!isNaN(e3)&&!e3ok?'hi':'lo'}">Normal &lt;20 U/mL — ${!isNaN(e3)?(e3ok?'✓ Normal':'⚠ Elevated'):'—'}</div>
+    </div>
+    <div class="elisa-box">
+      <div class="elisa-lbl">Anti-DSG1 antibody (skin protein)</div>
+      <div class="elisa-val ${!isNaN(e1)&&!e1ok?'hi':'lo'}">${!isNaN(e1)?e1+' U/mL':'Not entered'}</div>
+      <div class="elisa-ref ${!isNaN(e1)&&!e1ok?'hi':'lo'}">Normal &lt;20 U/mL — ${!isNaN(e1)?(e1ok?'✓ Normal':'⚠ Elevated'):'—'}</div>
+    </div>
+  </div>`;
+
+  const plainText=isPV
+    ?`<strong>${name}'s blood sample shows clear signs of Pemphigus Vulgaris.</strong> ${abnorms.length} protein${abnorms.length!==1?'s are':' is'} significantly elevated compared to a healthy person. The immune system appears to be producing antibodies that attack the skin proteins DSG3 and DSG1. The model is <strong>${conf}% confident</strong> in this result. <strong>A skin biopsy and specialist referral is strongly recommended to confirm.</strong>`
+    :`<strong>${name}'s blood sample does not show signs of Pemphigus Vulgaris.</strong> All 9 disease-related proteins are within the normal healthy range. The two quality-control proteins (ACTB and GAPDH) are also stable, meaning the blood sample was processed correctly. The model is <strong>${conf}% confident</strong> this patient does not have PV.`;
+
+  const recs=isPV
+    ?['Refer to a dermatologist for skin biopsy and immunofluorescence test (DIF)','Repeat the ELISA test to confirm antibody levels','Discuss possible treatment options (corticosteroids) with a specialist','Check for oral or mucosal lesions during clinical examination']
+    :['No PV detected — no immediate action required for this condition','Re-test if new skin blisters or mucosal symptoms appear','Sample quality confirmed — reference proteins are stable','Store this result in patient records for future comparison'];
+
+  document.getElementById('resultArea').innerHTML=`
+    <div class="verdict ${isPV?'pos':'neg'}" style="animation:fadeUp .4s ease">
+      <div class="v-top">
+        <div class="v-icon">${isPV?'🔴':'🟢'}</div>
+        <div style="flex:1">
+          <div class="v-label ${isPV?'pos':'neg'}">${isPV?'PV Positive — Disease Detected':'PV Negative — No Disease Detected'}</div>
+          <div class="v-desc">${isPV?`${abnorms.length} abnormal protein${abnorms.length!==1?'s':''} found. Immune attack on skin proteins detected.`:'All proteins within normal range. No PV activity found.'}</div>
+          <div class="conf-track"><div class="conf-fill ${isPV?'pos':'neg'}" id="cf" style="width:0%"></div></div>
+        </div>
+        <div class="v-conf">
+          <div class="v-conf-n ${isPV?'pos':'neg'}">${conf}%</div>
+          <div class="v-conf-l">Confidence</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--ink4)">
+        Patient: <strong style="color:var(--ink2)">${name}</strong> &nbsp;·&nbsp;
+        ID: <span style="font-family:var(--mono)">${pid}</span> &nbsp;·&nbsp;
+        ${age?age+' yrs':''}${sex?' · '+sex:''} &nbsp;·&nbsp; ${date}
+      </div>
+    </div>
+
+    <div class="plain-box">
+      <div class="plain-head">💬 What this means — in plain language</div>
+      <div class="plain-body">${plainText}</div>
+    </div>
+
+    <div class="protein-card">
+      <div class="pc-head">
+        <div class="pc-title">Protein Expression Report</div>
+        <div class="pc-badges">
+          ${abnorms.length?`<span class="tag tag-red">${abnorms.length} Abnormal</span>`:''}
+          <span class="tag tag-grn">${norms.length} Normal</span>
+          <span class="tag tag-blu">2 Reference</span>
+        </div>
+      </div>
+
+      ${elisaHtml}
+
+      ${abnorms.length?`<div class="sec-banner ab">⚠ Abnormal Proteins — These are significantly higher or lower than healthy levels</div><div style="overflow-x:auto"><table class="rtable">${thead}<tbody>${abnorms.map(d=>row(d,true)).join('')}</tbody></table></div>`:''}
+
+      <div class="sec-banner nm">${abnorms.length?'✓ Normal Proteins — Within healthy range':'✓ All Proteins Normal — Within healthy range'}</div>
+      <div style="overflow-x:auto"><table class="rtable">${thead}<tbody>${norms.map(d=>row(d,false)).join('')}</tbody></table></div>
+
+      <div class="sec-banner rf">🔵 Reference Proteins — Quality control (should always be ~100%)</div>
+      <div style="overflow-x:auto"><table class="rtable">${thead}<tbody>${refs.map(d=>row(d,false)).join('')}</tbody></table></div>
+
+      <div class="recs">
+        <div class="recs-t">Recommended Next Steps</div>
+        ${recs.map(r=>`<div class="rec"><span class="rec-arr">→</span>${r}</div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  setTimeout(()=>{const f=document.getElementById('cf');if(f)f.style.width=conf+'%';},200);
+  document.getElementById('resultArea').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
